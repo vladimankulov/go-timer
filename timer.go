@@ -91,19 +91,17 @@ func (timer *Timer) Reset(d time.Duration) error {
 }
 
 // RestartWithContext the timer
-func (timer *Timer) RestartWithContext(ctx context.Context) error {
+func (timer *Timer) RestartWithContext(ctx context.Context) {
 	timer.err = nil
 	timer.Stop()
 	timer.StartWithContext(ctx)
-	return nil
 }
 
 // Restart the timer
-func (timer *Timer) Restart() error {
+func (timer *Timer) Restart() {
 	timer.err = nil
 	timer.Stop()
 	timer.Start()
-	return nil
 }
 
 // Stop the timer
