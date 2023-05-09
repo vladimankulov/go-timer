@@ -54,6 +54,7 @@ func (timer *Timer) StartWithContext(ctx context.Context) {
 				return
 			}
 		case <-ctx.Done():
+			fmt.Println("stopping timer cause ctx is done...")
 			timer.isRunning = false
 			timer.Stop()
 			return
@@ -80,9 +81,6 @@ func (timer *Timer) Start() {
 
 // Reset Передаем новую переменную для времени срабатывания
 func (timer *Timer) Reset(d time.Duration) error {
-	if timer.err != nil {
-		return timer.err
-	}
 	if d > 0 {
 		timer.ticker.Reset(d)
 		return nil
@@ -94,9 +92,7 @@ func (timer *Timer) Reset(d time.Duration) error {
 
 // RestartWithContext the timer
 func (timer *Timer) RestartWithContext(ctx context.Context) error {
-	if timer.err != nil {
-		return timer.err
-	}
+	timer.err = nil
 	timer.Stop()
 	timer.StartWithContext(ctx)
 	return nil
@@ -104,9 +100,7 @@ func (timer *Timer) RestartWithContext(ctx context.Context) error {
 
 // Restart the timer
 func (timer *Timer) Restart() error {
-	if timer.err != nil {
-		return timer.err
-	}
+	timer.err = nil
 	timer.Stop()
 	timer.Start()
 	return nil
