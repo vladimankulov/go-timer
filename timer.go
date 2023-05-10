@@ -124,3 +124,7 @@ func (timer *Timer) IsRunning() bool {
 func (timer *Timer) Error() error {
 	return timer.err
 }
+
+func (timer *Timer) ResetError() {
+	timer.err = nil
+}
