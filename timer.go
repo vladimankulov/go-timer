@@ -18,7 +18,10 @@ type Timer struct {
 	ticker    *time.Ticker
 }
 
-// function that should be running when timer is ticked
+// function that will be called on every tick of ticker
+// bool return type will mark if timer will proceed
+// true timer will proceed, false timer will stop
+// err points the latest error in func
 type process func() (bool, error)
 
 // New create object with duration on when the function will be called
@@ -37,8 +40,8 @@ func New(d time.Duration, f process) (*Timer, error) {
 }
 
 // StartWithContext the timer
-// on every ticker of timer will be called process func
-// or stops when ctx is done
+// on every ticker of timer the func will be called
+// stops on bool mark of func or depends on context
 func (timer *Timer) StartWithContext(ctx context.Context) {
 	timer.ticker = time.NewTicker(timer.duration)
 	timer.isStarted = true
@@ -48,8 +51,8 @@ func (timer *Timer) StartWithContext(ctx context.Context) {
 		case <-timer.ticker.C:
 			timer.count++
 			isContinue, err := timer.f()
-			if err != nil || !isContinue {
-				timer.err = err
+			timer.err = err
+			if !isContinue {
 				timer.isRunning = false
 				return
 			}
@@ -63,7 +66,8 @@ func (timer *Timer) StartWithContext(ctx context.Context) {
 }
 
 // Start the timer
-// on every ticker of timer will be called process func
+// on every ticker of timer the process will be called
+// stops on bool mark of func
 func (timer *Timer) Start() {
 	timer.ticker = time.NewTicker(timer.duration)
 	timer.isStarted = true
@@ -71,15 +75,15 @@ func (timer *Timer) Start() {
 	for range timer.ticker.C {
 		timer.count++
 		isContinue, err := timer.f()
-		if err != nil || !isContinue {
-			timer.err = err
+		timer.err = err
+		if !isContinue {
 			timer.isRunning = false
 			return
 		}
 	}
 }
 
-// Reset Передаем новую переменную для времени срабатывания
+// Reset the timer with new duration, no need to start ticker again
 func (timer *Timer) Reset(d time.Duration) error {
 	if d > 0 {
 		timer.ticker.Reset(d)
@@ -90,14 +94,14 @@ func (timer *Timer) Reset(d time.Duration) error {
 
 }
 
-// RestartWithContext the timer
+// RestartWithContext the timer with the same duration and new context
 func (timer *Timer) RestartWithContext(ctx context.Context) {
 	timer.err = nil
 	timer.Stop()
 	timer.StartWithContext(ctx)
 }
 
-// Restart the timer
+// Restart the timer without context
 func (timer *Timer) Restart() {
 	timer.err = nil
 	timer.Stop()
@@ -123,8 +127,4 @@ func (timer *Timer) IsRunning() bool {
 
 func (timer *Timer) Error() error {
 	return timer.err
-}
-
-func (timer *Timer) ResetError() {
-	timer.err = nil
 }
